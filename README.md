@@ -4,7 +4,7 @@ Prototype of the "راهنمای احراز ویدئویی" screen (Figma: KYC -
 A head-turn guide clip plays inside the face frame, and the blue arc/arrow follows the direction he turns.
 
 - `prototype/head-turn-guide.html` – the page
-- `assets/liveness-head-turn-guide_edited.mp4` – clip used by the page
+- `assets/liveness-head-turn-guide_edited_compressed.mp4` – clip used by the page (256px, ~190 KB)
 - `prototype/figma-assets/` – vectors exported from Figma (reference)
 
 ## Run
