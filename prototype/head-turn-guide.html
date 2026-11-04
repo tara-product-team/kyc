@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Head Turn Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #007BFF;
+    --ring: #E6E6E6;
+    --arrow: #ABABAB;
+    --text: #111111;
+    --muted: #6B6B6B;
+    --navy: #1A1F71;
+    --page: #F2F2F2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--page);
+    font-family: "Vazirmatn", system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .phone {
+    position: relative;
+    width: 360px; height: 800px;
+    background: #fff;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,.12);
+  }
+  @media (max-width: 420px) {
+    body { padding: 0; background: #fff; }
+    .phone { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
+  }
+
+  /* header */
+  .header { position: relative; height: 64px; }
+  .steps {
+    position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 4px; direction: ltr;
+  }
+  .steps span { width: 56px; height: 4px; border-radius: 2px; background: var(--ring); }
+  .steps span.on { background: var(--blue); }
+  .close {
+    position: absolute; top: 20px; right: 16px;
+    width: 24px; height: 24px; border: 0; background: none; cursor: pointer;
+    display: grid; place-items: center;
+  }
+
+  /* guide */
+  .guide {
+    position: absolute; top: 190px; left: 50%; transform: translateX(-50%);
+    width: 242px; height: 292px;
+  }
+  /* Video is clipped by the ring outline scaled to the Figma mask box (43,43 156×206). */
+  .video-mask {
+    position: absolute; inset: 0;
+    clip-path: url(#faceClip);
+    background: #E9E9E9;
+  }
+  .video-mask video {
+    position: absolute; left: 43px; top: 43px; width: 156px; height: 206px;
+    object-fit: cover; object-position: 50% 30%; display: block;
+  }
+  .ring { position: absolute; inset: 0; overflow: visible; }
+  .ring .arc {
+    fill: none; stroke: var(--ring); stroke-width: 4;
+    stroke-linecap: round; stroke-miterlimit: 10;
+    transition: stroke .35s ease;
+  }
+  .ring .arc.on { stroke: var(--blue); }
+
+  .arrow { position: absolute; width: 24px; height: 24px; color: var(--arrow); }
+  .arrow svg { position: absolute; inset: 0; width: 24px; height: 24px; transition: opacity .3s ease; }
+  .arrow .filled { opacity: 0; color: var(--blue); }
+  .arrow.on .outline { opacity: 0; }
+  .arrow.on .filled { opacity: 1; }
+  .arrow.on::after {
+    content: ""; position: absolute; inset: 2px; border-radius: 50%;
+    border: 2px solid var(--blue); animation: pulse 1.4s ease-out infinite;
+  }
+  @keyframes pulse { from { transform: scale(1); opacity: .5; } to { transform: scale(1.8); opacity: 0; } }
+  /* positions from Figma Component 93 */
+  .a-up    { left: 109px; top: 0; }
+  .a-down  { left: 109px; top: 268px; }
+  .a-left  { left: 0;     top: 134px; }
+  .a-right { left: 218px; top: 134px; }
+  .a-down svg  { transform: rotate(180deg); }
+  .a-left svg  { transform: rotate(-90deg); }
+  .a-right svg { transform: rotate(90deg); }
+
+  /* copy */
+  .copy { position: absolute; top: 514px; left: 24px; right: 24px; text-align: center; }
+  .copy h1 { font-size: 16px; font-weight: 700; color: var(--text); line-height: 29px; }
+  .copy p { margin-top: 16px; font-size: 13px; line-height: 25px; color: var(--muted); }
+
+  .cta {
+    position: absolute; left: 24px; right: 24px; bottom: 24px; height: 40px;
+    border: 1px solid #9E9E9E; border-radius: 8px; background: #fff;
+    font: 500 14px "Vazirmatn", sans-serif; color: var(--navy); cursor: pointer;
+  }
+  .cta:active { background: #F6F6F6; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arrow.on::after { animation: none; }
+  }
+</style>
+</head>
+<body>
+  <main class="phone">
+    <div class="header">
+      <div class="steps" aria-label="مرحله ۲ از ۲"><span></span><span class="on"></span></div>
+      <button class="close" aria-label="بستن">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2l12 12M14 2 2 14" stroke="#111" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <section class="guide" aria-label="راهنمای چرخش سر">
+      <div class="video-mask">
+        <video id="guideVideo" src="../assets/liveness-head-turn-guide_edited.mp4"
+               autoplay muted loop playsinline preload="auto"></video>
+      </div>
+
+      <!-- Ring arcs: exact Figma vectors (Component 93), placed in its 242×292 space. -->
+      <svg class="ring" viewBox="0 0 242 292" width="242" height="292" aria-hidden="true">
+        <defs>
+          <clipPath id="faceClip" clipPathUnits="userSpaceOnUse">
+            <!-- ring outline, scaled about centre (121,146) to the 156×206 mask box -->
+            <path transform="translate(121 146) scale(0.9174 0.9364) translate(-121 -146)"
+              d="M118.21 36H123.79C151.56 36 176.12 49.82 191 70.99L195 77C201.99 89.09 206 103.12 206 118.08V173.92C206 188.88 201.99 202.91 195.01 215L191 221.01C176.12 242.18 151.56 256 123.79 256H118.21C90.44 256 65.87 242.17 51 221L46.99 215C40 202.91 36 188.88 36 173.92V118.08C36 103.12 40 89.09 47 77L51 71C65.87 49.83 90.44 36 118.21 36Z"/>
+          </clipPath>
+        </defs>
+        <path class="arc" data-dir="up"    d="M51 71C65.87 49.83 90.44 36 118.21 36H123.79C151.56 36 176.12 49.82 191 70.99"/>
+        <path class="arc" data-dir="right" d="M195.01 215C201.99 202.91 206 188.88 206 173.92V118.08C206 103.12 201.99 89.09 195 77"/>
+        <path class="arc" data-dir="down"  d="M191 221.01C176.12 242.18 151.56 256 123.79 256H118.21C90.44 256 65.87 242.17 51 221"/>
+        <path class="arc" data-dir="left"  d="M46.99 215C40 202.91 36 188.88 36 173.92V118.08C36 103.12 40 89.09 47 77"/>
+      </svg>
+
+      <!-- Figma arrow_circle icons (Material). Outline = idle grey, filled = active blue.
+           Both drawn as "up"; other sides rotate. -->
+      <span class="arrow a-up" data-dir="up"><svg class="outline" viewBox="0 0 24 24"><use href="#ic-outline"/></svg><svg class="filled" viewBox="0 0 24 24"><use href="#ic-filled"/></svg></span>
+      <span class="arrow a-down" data-dir="down"><svg class="outline" viewBox="0 0 24 24"><use href="#ic-outline"/></svg><svg class="filled" viewBox="0 0 24 24"><use href="#ic-filled"/></svg></span>
+      <span class="arrow a-left" data-dir="left"><svg class="outline" viewBox="0 0 24 24"><use href="#ic-outline"/></svg><svg class="filled" viewBox="0 0 24 24"><use href="#ic-filled"/></svg></span>
+      <span class="arrow a-right" data-dir="right"><svg class="outline" viewBox="0 0 24 24"><use href="#ic-outline"/></svg><svg class="filled" viewBox="0 0 24 24"><use href="#ic-filled"/></svg></span>
+
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+          <path id="ic-outline" fill="currentColor" d="M11 16H13V11.8L14.6 13.4L16 12L12 8L8 12L9.4 13.4L11 11.8V16ZM12 22C10.6167 22 9.31667 21.7375 8.1 21.2125C6.88333 20.6875 5.825 19.975 4.925 19.075C4.025 18.175 3.3125 17.1167 2.7875 15.9C2.2625 14.6833 2 13.3833 2 12C2 10.6167 2.2625 9.31667 2.7875 8.1C3.3125 6.88333 4.025 5.825 4.925 4.925C5.825 4.025 6.88333 3.3125 8.1 2.7875C9.31667 2.2625 10.6167 2 12 2C13.3833 2 14.6833 2.2625 15.9 2.7875C17.1167 3.3125 18.175 4.025 19.075 4.925C19.975 5.825 20.6875 6.88333 21.2125 8.1C21.7375 9.31667 22 10.6167 22 12C22 13.3833 21.7375 14.6833 21.2125 15.9C20.6875 17.1167 19.975 18.175 19.075 19.075C18.175 19.975 17.1167 20.6875 15.9 21.2125C14.6833 21.7375 13.3833 22 12 22ZM12 20C14.2333 20 16.125 19.225 17.675 17.675C19.225 16.125 20 14.2333 20 12C20 9.76667 19.225 7.875 17.675 6.325C16.125 4.775 14.2333 4 12 4C9.76667 4 7.875 4.775 6.325 6.325C4.775 7.875 4 9.76667 4 12C4 14.2333 4.775 16.125 6.325 17.675C7.875 19.225 9.76667 20 12 20Z"/>
+          <path id="ic-filled" fill="currentColor" d="M11 16H13V11.8L14.6 13.4L16 12L12 8L8 12L9.4 13.4L11 11.8V16ZM12 22C10.6167 22 9.31667 21.7375 8.1 21.2125C6.88333 20.6875 5.825 19.975 4.925 19.075C4.025 18.175 3.3125 17.1167 2.7875 15.9C2.2625 14.6833 2 13.3833 2 12C2 10.6167 2.2625 9.31667 2.7875 8.1C3.3125 6.88333 4.025 5.825 4.925 4.925C5.825 4.025 6.88333 3.3125 8.1 2.7875C9.31667 2.2625 10.6167 2 12 2C13.3833 2 14.6833 2.2625 15.9 2.7875C17.1167 3.3125 18.175 4.025 19.075 4.925C19.975 5.825 20.6875 6.88333 21.2125 8.1C21.7375 9.31667 22 10.6167 22 12C22 13.3833 21.7375 14.6833 21.2125 15.9C20.6875 17.1167 19.975 18.175 19.075 19.075C18.175 19.975 17.1167 20.6875 15.9 21.2125C14.6833 21.7375 13.3833 22 12 22Z"/>
+        </defs>
+      </svg>
+    </section>
+
+    <section class="copy">
+      <h1>راهنمای احراز ویدئویی</h1>
+      <p>صورت خود را مطابق جهت نمایش‌داده‌شده روی صفحه بچرخانید و تا پایان ضبط در کادر باقی بمانید.<br>مدت زمان ضبط ویدئو: ۱۰ ثانیه</p>
+    </section>
+
+    <button class="cta" id="startBtn">شروع</button>
+  </main>
+
+<script>
+  // Direction cues (seconds), from a 4fps frame scan of the edited clip.
+  // Blue lights ~0.2s before the head starts moving and clears as it returns to centre.
+  const CUES = [
+    { from: 0.0,  to: 3.1,  dir: "right" }, // turns 0.5 → peak 1.5–2.5 → centre 3.25
+    { from: 3.1,  to: 3.9,  dir: null    },
+    { from: 3.9,  to: 6.2,  dir: "left"  }, // turns 4.25 → peak 5.0–5.5 → centre 6.25
+    { from: 6.2,  to: 8.3,  dir: null    }, // holds centre
+    { from: 8.3,  to: 10.2, dir: "up"    }, // tilts 8.5 → peak 9.0–9.75 → centre 10.25
+    { from: 10.2, to: 10.5, dir: null    },
+    { from: 10.5, to: 12.1, dir: "down"  }, // tilts 10.75 → peak 11.25–11.75 → back 12.25
+    { from: 12.1, to: 99,   dir: null    },
+  ];
+  const video = document.getElementById("guideVideo");
+  const parts = document.querySelectorAll("[data-dir]");
+  let current;
+
+  function setDir(dir) {
+    if (dir === current) return;
+    current = dir;
+    parts.forEach(el => el.classList.toggle("on", el.dataset.dir === dir));
+  }
+  function tick() {
+    const t = video.currentTime;
+    const cue = CUES.find(c => t >= c.from && t < c.to);
+    setDir(cue ? cue.dir : null);
+    requestAnimationFrame(tick);
+  }
+  setDir("right");
+  requestAnimationFrame(tick);
+
+  document.getElementById("startBtn").addEventListener("click", () => {
+    video.currentTime = 0; video.play();
+  });
+</script>
+</body>
+</html>
