@@ -194,6 +194,11 @@
   setDir("right");
   requestAnimationFrame(tick);
 
+  // Browsers pause background autoplay video; resume when the page is visible again.
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && video.paused) video.play().catch(() => {});
+  });
+
   document.getElementById("startBtn").addEventListener("click", () => {
     video.currentTime = 0; video.play();
   });
