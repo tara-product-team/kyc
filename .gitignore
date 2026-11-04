@@ -1,1 +1,5 @@
 .DS_Store
+
+# Only the clip used by the prototype is tracked
+assets/*
+!assets/liveness-head-turn-guide_edited_compressed.mp4
