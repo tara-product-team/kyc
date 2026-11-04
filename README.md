@@ -13,6 +13,8 @@ A head-turn guide clip plays inside the face frame, and the blue arc/arrow follo
 python3 -m http.server 8765
 ```
 
-Open http://localhost:8765/prototype/head-turn-guide.html (the video needs a server; it won't play from `file://`).
+Live: https://tara-product-team.github.io/kyc/
+
+Locally, open http://localhost:8765/prototype/head-turn-guide.html (the video needs a server; it won't play from `file://`).
 
 Cue timings live in the `CUES` array at the bottom of the HTML.
