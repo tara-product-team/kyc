@@ -164,43 +164,180 @@
   </main>
 
 <script>
-  // Direction cues (seconds), from a 4fps frame scan of the edited clip.
-  // Blue lights ~0.2s before the head starts moving and clears as it returns to centre.
-  const CUES = [
-    { from: 0.0,  to: 3.1,  dir: "right" }, // turns 0.5 → peak 1.5–2.5 → centre 3.25
-    { from: 3.1,  to: 3.9,  dir: null    },
-    { from: 3.9,  to: 6.2,  dir: "left"  }, // turns 4.25 → peak 5.0–5.5 → centre 6.25
-    { from: 6.2,  to: 8.3,  dir: null    }, // holds centre
-    { from: 8.3,  to: 10.2, dir: "up"    }, // tilts 8.5 → peak 9.0–9.75 → centre 10.25
-    { from: 10.2, to: 10.5, dir: null    },
-    { from: 10.5, to: 12.1, dir: "down"  }, // tilts 10.75 → peak 11.25–11.75 → back 12.25
-    { from: 12.1, to: 99,   dir: null    },
-  ];
   const video = document.getElementById("guideVideo");
   const parts = document.querySelectorAll("[data-dir]");
-  let current;
+  let current = null;
 
   function setDir(dir) {
     if (dir === current) return;
     current = dir;
     parts.forEach(el => el.classList.toggle("on", el.dataset.dir === dir));
   }
+
+  // Motion timings in the clip (seconds):
+  // - Right: head moves ~0.45s, returns center ~3.75s
+  // - Left:  head moves ~3.96s, returns center ~7.00s
+  // - Up:    head moves ~8.15s, returns center ~10.50s
+  // - Down:  head moves ~10.58s, returns center ~12.46s
+  //
+  // Natural reaction model (~1.1s delay between guide lighting up and motion):
+  // 1. Previous cue clears as head returns straight to center.
+  // 2. Brief neutral rest (~200ms) with character looking straight.
+  // 3. Direction guide turns BLUE (character perceives cue).
+  // 4. ~1.1s reaction delay with face still looking straight.
+  // 5. Video plays and character executes the turn/tilt following the guide.
+
+  let activeTimers = [];
+  let isScriptPaused = false;
+  let pauseDone = { right: false, left: false, up: false, down: false };
+  let lastTime = 0;
+
+  function clearTimers() {
+    activeTimers.forEach(id => clearTimeout(id));
+    activeTimers = [];
+  }
+
+  function resetState() {
+    clearTimers();
+    isScriptPaused = false;
+    pauseDone = { right: false, left: false, up: false, down: false };
+    setDir(null);
+  }
+
   function tick() {
     const t = video.currentTime;
-    const cue = CUES.find(c => t >= c.from && t < c.to);
-    setDir(cue ? cue.dir : null);
+
+    // Reset state when video loops back or seeks backward
+    if (t < lastTime - 1.0) {
+      resetState();
+    }
+    lastTime = t;
+
+    if (!isScriptPaused) {
+      // Pause 1: Right cue lead-in at start/loop (t ~ 0.10s)
+      if (t >= 0.10 && t < 0.25 && !pauseDone.right) {
+        pauseDone.right = true;
+        isScriptPaused = true;
+        setDir(null);
+        video.pause();
+
+        // 200ms neutral rest, then turn RIGHT blue
+        const t1 = setTimeout(() => {
+          setDir("right");
+        }, 200);
+
+        // Resume: 200ms rest + 750ms pause + 350ms playback to 0.45s = 1100ms (1.1s) delay after blue
+        const t2 = setTimeout(() => {
+          isScriptPaused = false;
+          video.play().catch(() => {});
+        }, 950);
+
+        activeTimers.push(t1, t2);
+      }
+      // Pause 2: Between Right and Left (t ~ 3.82s)
+      else if (t >= 3.82 && t < 3.95 && !pauseDone.left) {
+        pauseDone.left = true;
+        isScriptPaused = true;
+        setDir(null);
+        video.pause();
+
+        // 200ms neutral rest, then turn LEFT blue
+        const t1 = setTimeout(() => {
+          setDir("left");
+        }, 200);
+
+        // Resume: 200ms rest + 960ms pause + 140ms playback to 3.96s = 1100ms (1.1s) delay after blue
+        const t2 = setTimeout(() => {
+          isScriptPaused = false;
+          video.play().catch(() => {});
+        }, 1160);
+
+        activeTimers.push(t1, t2);
+      }
+      // Pause 3: Between Left and Up (t ~ 7.10s)
+      else if (t >= 7.10 && t < 7.25 && !pauseDone.up) {
+        pauseDone.up = true;
+        isScriptPaused = true;
+        setDir(null);
+        video.pause();
+
+        // 200ms neutral rest, then turn UP blue
+        const t1 = setTimeout(() => {
+          setDir("up");
+        }, 200);
+
+        // Resume: 200ms rest + 50ms pause + 1050ms playback to 8.15s = 1100ms (1.1s) delay after blue
+        const t2 = setTimeout(() => {
+          isScriptPaused = false;
+          video.play().catch(() => {});
+        }, 250);
+
+        activeTimers.push(t1, t2);
+      }
+      // Pause 4: Between Up and Down (t ~ 10.50s)
+      else if (t >= 10.50 && t < 10.60 && !pauseDone.down) {
+        pauseDone.down = true;
+        isScriptPaused = true;
+        setDir(null);
+        video.pause();
+
+        // 200ms neutral rest, then turn DOWN blue
+        const t1 = setTimeout(() => {
+          setDir("down");
+        }, 200);
+
+        // Resume: 200ms rest + 1020ms pause + 80ms playback to 10.58s = 1100ms (1.1s) delay after blue
+        const t2 = setTimeout(() => {
+          isScriptPaused = false;
+          video.play().catch(() => {});
+        }, 1220);
+
+        activeTimers.push(t1, t2);
+      }
+      // Continuous cue synchronization
+      else {
+        if (t >= 0.10 && t < 3.75) {
+          // Right: active during/after pause, ends 3.75s
+          setDir("right");
+        } else if (t >= 3.75 && t < 3.82) {
+          setDir(null);
+        } else if (t >= 3.82 && t < 7.00) {
+          // Left: active during/after pause, ends 7.00s
+          setDir("left");
+        } else if (t >= 7.00 && t < 7.10) {
+          setDir(null);
+        } else if (t >= 7.10 && t < 10.50) {
+          // Up: active during/after pause, ends 10.50s
+          setDir("up");
+        } else if (t >= 10.50 && t < 12.46) {
+          // Down: active during/after pause, ends 12.46s
+          setDir("down");
+        } else {
+          setDir(null);
+        }
+      }
+    }
+
     requestAnimationFrame(tick);
   }
-  setDir("right");
+
   requestAnimationFrame(tick);
+
+  video.addEventListener("seeking", () => {
+    resetState();
+  });
 
   // Browsers pause background autoplay video; resume when the page is visible again.
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && video.paused) video.play().catch(() => {});
+    if (!document.hidden && !isScriptPaused && video.paused) {
+      video.play().catch(() => {});
+    }
   });
 
   document.getElementById("startBtn").addEventListener("click", () => {
-    video.currentTime = 0; video.play();
+    resetState();
+    video.currentTime = 0;
+    video.play().catch(() => {});
   });
 </script>
 </body>

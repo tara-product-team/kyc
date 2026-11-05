@@ -17,4 +17,4 @@ Live: https://tara-product-team.github.io/kyc/
 
 Locally, open http://localhost:8765/prototype/head-turn-guide.html (the video needs a server; it won't play from `file://`).
 
-Cue timings live in the `CUES` array at the bottom of the HTML.
+Direction cues and pauses are synced in the script at the bottom of the HTML: the guide lights blue first, followed by a ~1.1s reaction pause while looking straight before the head moves in the clip.
